@@ -1,6 +1,6 @@
 clc
 clear
-addpath('D:\code\spikes-master\analysis')
+addpath('D:\code\spikes-master\analysis') %code package downloaded from github cortex-lab/spikes
 ddpath('D:\code\npy-matlab\npy-matlab\')
 cd(lwd);
 rootpath=lwd;
