@@ -30,7 +30,7 @@ for fidx=1:length(sig_con)
     disp(fidx);    
     sig_con{fidx,2}.pc_stem=session{fidx};      
     sig_con{fidx,2}.all_su=cluster_id(contains(path,sig_con{fidx,2}.pc_stem));   
-    sig_con{fidx,2}.pair_comb=nchoosek(sig_con{fidx,2}.all_su,2); % all pairs combination    
+    sig_con{fidx,2}.pair_comb=cat(1,nchoosek(sig_con{fidx,2}.all_su,2),fliplr(nchoosek(sig_con{fidx,2}.all_su,2))); % all pairs combination, uni-dir to bi-dir   
     sig_con{fidx,2}.all_reg=reg(:,contains(path,sig_con{fidx,2}.pc_stem))';
     sig_con{fidx,2}.all_sel=sus_trans(contains(path,sig_con{fidx,2}.pc_stem),:); 
 end
