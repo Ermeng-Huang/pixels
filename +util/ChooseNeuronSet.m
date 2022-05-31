@@ -1,13 +1,14 @@
 function out=ChooseNeuronSet(opt)
 arguments    
     opt.learning (1,1) char {mustBeMember(opt.learning,{'L','W','all'})};
-    opt.region (1,:) char
-    opt.regionLevel (1,1) double
+    opt.region (1,:) char = 'all'
+    opt.regionLevel (1,1) double = 5
     opt.sel (1,:) char
     opt.opto (1,:) char
+    opt.hemisphere (1,:) char ='all'
 end
 
-Path=util.Path_default;
+Path=util.Path_default('task','AIopto');
 sus_trans=h5read(Path.selectivity,'/sus_trans_noPermutaion')';
 cluster_id=h5read(Path.selectivity,'/cluster_id');
 reg=regexp(h5read(Path.selectivity,'/reg'),'(\w|\\|-)*','match','once')';
@@ -32,8 +33,13 @@ if strcmp(opt.region,'all')
 %         reg_good=ismember(reg,reg_W);
 %     end
 else
-    
+   reg_good=ismember(reg(:,7),{opt.region});    
 end
+if strcmp(opt.hemisphere,'all') 
+else
+   reg_good=reg_good&ismember(reg(:,11),opt.hemisphere);  
+end
+
 if strcmp(opt.sel,'sustained')
     sel=sus_trans(:,1)==1;
 elseif strcmp(opt.sel,'transient')
@@ -42,15 +48,20 @@ elseif strcmp(opt.sel,'sel') %not include switch neuron
     sel=sus_trans(:,1)==1|sus_trans(:,2)==1;
 elseif strcmp(opt.sel,'nonsel')
     sel=sus_trans(:,1)==0& sus_trans(:,2)==0 & sus_trans(:,3)==0;
+elseif contains(opt.sel,'transient_')
+    sel=sus_trans(:,2)==1 & sus_trans(:,str2double(opt.sel(end))+6)~=0;
 else
     sel=ones(size(cluster_id));
 end
 
 if strcmp(opt.opto,'none')
     laser_good=ones(size(cluster_id));
+elseif strcmp(opt.opto,'laser-modulated')
+    laser=h5read(Path.opto,'/rank');
+    laser_good=any(laser(:,17),2);
 elseif strcmp(opt.opto,'laser-nonmodulated')
     laser=h5read(Path.opto,'/rank');
-    laser_good=any(laser(:,17:20),2);
+    laser_good=~any(laser(:,17:20),2);
 elseif contains(opt.opto,'laser')    %laser-0/1/2/3/4
 %     load(Path.opto) %%%%%%%%%
 %     p=cell2mat(cellfun(@(x)(x(2,:)),P(:,1),'UniformOutput',false));
